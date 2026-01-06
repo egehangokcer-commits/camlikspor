@@ -173,7 +173,7 @@ export default async function GroupDetailPage({
             <CardContent>
               <div className="space-y-2">
                 {group.schedules
-                  .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+                  .sort((a: Schedule, b: Schedule) => a.dayOfWeek - b.dayOfWeek)
                   .map((schedule: Schedule) => (
                     <div
                       key={schedule.id}
