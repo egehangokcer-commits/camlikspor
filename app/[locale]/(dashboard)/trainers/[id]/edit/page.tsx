@@ -35,8 +35,9 @@ export default async function EditTrainerPage({ params }: EditTrainerPageProps) 
   }
 
   // Calculate total paid salary from salary payments
+  type SalaryPayment = NonNullable<typeof trainerData.salaryPayments>[number];
   const totalPaidSalary = trainerData.salaryPayments?.reduce(
-    (sum, payment) => sum + (payment.amount || 0),
+    (sum: number, payment: SalaryPayment) => sum + (payment.amount || 0),
     0
   ) || 0;
 
