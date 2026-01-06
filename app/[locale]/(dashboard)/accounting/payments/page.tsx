@@ -53,15 +53,17 @@ export default async function PaymentsPage({ params }: PaymentsPageProps) {
     take: 50,
   });
 
+  type Payment = (typeof payments)[number];
+
   const stats = {
-    pending: payments.filter((p) => p.status === "PENDING").length,
-    completed: payments.filter((p) => p.status === "COMPLETED").length,
+    pending: payments.filter((p: Payment) => p.status === "PENDING").length,
+    completed: payments.filter((p: Payment) => p.status === "COMPLETED").length,
     overdue: payments.filter(
-      (p) => p.status === "PENDING" && new Date(p.dueDate) < new Date()
+      (p: Payment) => p.status === "PENDING" && new Date(p.dueDate) < new Date()
     ).length,
     totalAmount: payments
-      .filter((p) => p.status === "COMPLETED")
-      .reduce((sum, p) => sum + p.amount, 0),
+      .filter((p: Payment) => p.status === "COMPLETED")
+      .reduce((sum: number, p: Payment) => sum + p.amount, 0),
   };
 
   return (
