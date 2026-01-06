@@ -71,12 +71,14 @@ export default async function DealerPaymentsPage({ params }: DealerPaymentsPageP
     paymentCount: number;
   };
 
+  type DealerPayment = Dealer["payments"][number];
+
   // Calculate payment stats for each dealer
   const dealerStats: DealerStat[] = dealers.map((dealer: Dealer) => {
-    const totalPayments = dealer.payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalPayments = dealer.payments.reduce((sum: number, p: DealerPayment) => sum + p.amount, 0);
     const thisMonthPayments = dealer.payments
-      .filter((p) => p.paidAt && p.paidAt >= startOfMonth && p.paidAt <= endOfMonth)
-      .reduce((sum, p) => sum + p.amount, 0);
+      .filter((p: DealerPayment) => p.paidAt && p.paidAt >= startOfMonth && p.paidAt <= endOfMonth)
+      .reduce((sum: number, p: DealerPayment) => sum + p.amount, 0);
 
     return {
       id: dealer.id,
