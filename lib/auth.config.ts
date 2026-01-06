@@ -6,6 +6,7 @@ import { UserRole } from "@/lib/types";
 // The actual authorize logic is in auth.ts which extends this config
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/tr/login",
