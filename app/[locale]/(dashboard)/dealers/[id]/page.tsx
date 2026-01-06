@@ -126,6 +126,8 @@ export default async function DealerDetailPage({
     _sum: { amount: true },
   });
 
+  type MonthlyPayment = (typeof monthlyPayments)[number];
+
   // Group by month
   const monthlyData: { month: string; amount: number }[] = [];
   for (let i = 5; i >= 0; i--) {
@@ -134,8 +136,8 @@ export default async function DealerDetailPage({
     const monthLabel = format(monthDate, "MMMM yyyy", { locale: dateLocale });
 
     const monthTotal = monthlyPayments
-      .filter((p) => p.paidAt && format(p.paidAt, "yyyy-MM") === monthKey)
-      .reduce((sum, p) => sum + (p._sum.amount || 0), 0);
+      .filter((p: MonthlyPayment) => p.paidAt && format(p.paidAt, "yyyy-MM") === monthKey)
+      .reduce((sum: number, p: MonthlyPayment) => sum + (p._sum.amount || 0), 0);
 
     monthlyData.push({ month: monthLabel, amount: monthTotal });
   }
@@ -149,6 +151,9 @@ export default async function DealerDetailPage({
     orderBy: { paidAt: "desc" },
     take: 10,
   });
+
+  type RecentPayment = (typeof recentPayments)[number];
+  type MonthlyDataItem = { month: string; amount: number };
 
   // Get active students count
   const activeStudents = await prisma.student.count({
@@ -280,7 +285,7 @@ export default async function DealerDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {monthlyData.map((data, index) => (
+                {monthlyData.map((data: MonthlyDataItem, index: number) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{data.month}</TableCell>
                     <TableCell className="text-right">
@@ -447,7 +452,7 @@ export default async function DealerDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentPayments.map((payment) => (
+                {recentPayments.map((payment: RecentPayment) => (
                   <TableRow key={payment.id}>
                     <TableCell>
                       {payment.paidAt
