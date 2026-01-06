@@ -1,13 +1,16 @@
 "use server";
 
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { UserRole } from "@/lib/types";
+import { UserRole, Permission } from "@/lib/types";
 import { turkishPhoneOptionalSchema } from "@/lib/utils/validation";
 import bcrypt from "bcryptjs";
 import { getDefaultPermissionsForRole } from "@/lib/utils/permissions";
+
+type TransactionClient = Omit<typeof prisma, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
 const dealerSchema = z.object({
   name: z.string().min(2, "Bayi adi en az 2 karakter olmali"),
@@ -109,7 +112,7 @@ export async function createDealerAction(
     const defaultPermissions = getDefaultPermissionsForRole(UserRole.DEALER_ADMIN);
 
     // Create dealer and admin user in a transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Create dealer
       const dealer = await tx.dealer.create({
         data: {
@@ -132,7 +135,7 @@ export async function createDealerAction(
           dealerId: dealer.id,
           isActive: true,
           permissions: {
-            create: defaultPermissions.map((p) => ({ permission: p })),
+            create: defaultPermissions.map((p: Permission) => ({ permission: p })),
           },
         },
       });
@@ -367,7 +370,7 @@ export async function createDealerUserAction(
         dealerId: dealerId,
         isActive: true,
         permissions: {
-          create: defaultPermissions.map((p) => ({ permission: p })),
+          create: defaultPermissions.map((p: Permission) => ({ permission: p })),
         },
       },
     });

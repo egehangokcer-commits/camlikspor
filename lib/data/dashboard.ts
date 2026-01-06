@@ -124,13 +124,17 @@ export async function getDashboardStats(dealerId?: string | null): Promise<Dashb
     }),
   ]);
 
+  type AttendanceGroup = (typeof todayAttendances)[number];
+  type StudentBirthday = (typeof upcomingBirthdaysRaw)[number];
+  type PreRegistrationItem = (typeof recentPreRegistrations)[number];
+
   // Calculate today's attendance stats
   const attendanceStats = {
     present: 0,
     absent: 0,
     total: 0,
   };
-  todayAttendances.forEach((a) => {
+  todayAttendances.forEach((a: AttendanceGroup) => {
     if (a.status === "PRESENT" || a.status === "LATE") {
       attendanceStats.present += a._count;
     } else if (a.status === "ABSENT") {
@@ -143,14 +147,14 @@ export async function getDashboardStats(dealerId?: string | null): Promise<Dashb
   const nextWeek = new Date(today);
   nextWeek.setDate(nextWeek.getDate() + 7);
   const upcomingBirthdays = upcomingBirthdaysRaw
-    .filter((student) => {
+    .filter((student: StudentBirthday) => {
       if (!student.birthDate) return false;
       const bday = new Date(student.birthDate);
       bday.setFullYear(today.getFullYear());
       return bday >= today && bday <= nextWeek;
     })
     .slice(0, 5)
-    .map((s) => ({
+    .map((s: StudentBirthday) => ({
       id: s.id,
       name: `${s.firstName} ${s.lastName}`,
       birthDate: s.birthDate,
@@ -164,7 +168,7 @@ export async function getDashboardStats(dealerId?: string | null): Promise<Dashb
     pendingPayments: pendingPaymentsCount,
     todayAttendance: attendanceStats,
     upcomingBirthdays,
-    recentPreRegistrations: recentPreRegistrations.map((r) => ({
+    recentPreRegistrations: recentPreRegistrations.map((r: PreRegistrationItem) => ({
       id: r.id,
       studentName: `${r.firstName} ${r.lastName}`,
       createdAt: r.createdAt,

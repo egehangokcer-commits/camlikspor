@@ -62,7 +62,7 @@ export async function createAttendanceSessionAction(
         trainerId,
         date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
         attendances: {
-          create: attendances.map((a) => ({
+          create: attendances.map((a: AttendanceRecord) => ({
             studentId: a.studentId,
             status: a.status,
             notes: a.notes || null,
@@ -95,7 +95,7 @@ export async function updateAttendanceSessionAction(
       prisma.attendance.deleteMany({
         where: { sessionId },
       }),
-      ...attendances.map((a) =>
+      ...attendances.map((a: AttendanceRecord) =>
         prisma.attendance.create({
           data: {
             sessionId,

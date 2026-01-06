@@ -179,6 +179,9 @@ export async function copyGroupAction(
       return { message: "Grup bulunamadi", success: false };
     }
 
+    type Schedule = (typeof originalGroup.schedules)[number];
+    type TrainerGroup = (typeof originalGroup.trainers)[number];
+
     // Create new group with copied data
     const newGroup = await prisma.group.create({
       data: {
@@ -190,14 +193,14 @@ export async function copyGroupAction(
         description: originalGroup.description,
         maxCapacity: originalGroup.maxCapacity,
         schedules: {
-          create: originalGroup.schedules.map((s) => ({
+          create: originalGroup.schedules.map((s: Schedule) => ({
             dayOfWeek: s.dayOfWeek,
             startTime: s.startTime,
             endTime: s.endTime,
           })),
         },
         trainers: {
-          create: originalGroup.trainers.map((t) => ({
+          create: originalGroup.trainers.map((t: TrainerGroup) => ({
             trainerId: t.trainerId,
             isPrimary: t.isPrimary,
           })),

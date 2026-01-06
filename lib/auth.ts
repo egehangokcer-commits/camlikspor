@@ -47,7 +47,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         // Get permissions (from DB or defaults based on role)
-        const dbPermissions = user.permissions.map((p) => p.permission);
+        type UserPermission = (typeof user.permissions)[number];
+        const dbPermissions = user.permissions.map((p: UserPermission) => p.permission);
         const permissions =
           dbPermissions.length > 0
             ? dbPermissions
