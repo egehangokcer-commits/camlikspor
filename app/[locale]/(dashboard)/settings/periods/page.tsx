@@ -34,8 +34,10 @@ export default async function PeriodsPage({ params }: PeriodsPageProps) {
     orderBy: { startDate: "desc" },
   });
 
+  type Period = (typeof periods)[number];
+
   // Format dates for display and edit
-  const formattedPeriods = periods.map((period) => ({
+  const formattedPeriods = periods.map((period: Period) => ({
     ...period,
     startDateFormatted: format(period.startDate, "dd.MM.yyyy"),
     endDateFormatted: format(period.endDate, "dd.MM.yyyy"),

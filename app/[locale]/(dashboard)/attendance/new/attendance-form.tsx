@@ -162,10 +162,10 @@ export function AttendanceForm({
     }
   };
 
-  const presentCount = Object.values(attendances).filter((s) => s === "PRESENT").length;
-  const absentCount = Object.values(attendances).filter((s) => s === "ABSENT").length;
-  const lateCount = Object.values(attendances).filter((s) => s === "LATE").length;
-  const excusedCount = Object.values(attendances).filter((s) => s === "EXCUSED").length;
+  const presentCount = Object.values(attendances).filter((s: AttendanceStatus) => s === "PRESENT").length;
+  const absentCount = Object.values(attendances).filter((s: AttendanceStatus) => s === "ABSENT").length;
+  const lateCount = Object.values(attendances).filter((s: AttendanceStatus) => s === "LATE").length;
+  const excusedCount = Object.values(attendances).filter((s: AttendanceStatus) => s === "EXCUSED").length;
 
   return (
     <div className="space-y-6">
@@ -181,7 +181,7 @@ export function AttendanceForm({
                 <SelectValue placeholder="Grup secin" />
               </SelectTrigger>
               <SelectContent>
-                {groups.map((group) => (
+                {groups.map((group: Group) => (
                   <SelectItem key={group.id} value={group.id}>
                     {group.name}
                   </SelectItem>
@@ -197,7 +197,7 @@ export function AttendanceForm({
                 <SelectValue placeholder="Antrenor secin" />
               </SelectTrigger>
               <SelectContent>
-                {trainers.map((trainer) => (
+                {trainers.map((trainer: Trainer) => (
                   <SelectItem key={trainer.id} value={trainer.id}>
                     {trainer.firstName} {trainer.lastName}
                   </SelectItem>
@@ -267,7 +267,7 @@ export function AttendanceForm({
               </div>
             ) : (
               <div className="space-y-3">
-                {students.map((student) => (
+                {students.map((student: GroupStudent) => (
                   <div
                     key={student.id}
                     className="flex items-center justify-between p-3 border rounded-lg"

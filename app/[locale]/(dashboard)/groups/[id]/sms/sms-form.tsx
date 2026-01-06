@@ -35,24 +35,24 @@ export function GroupSmsForm({
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState("");
   const [selectedPhones, setSelectedPhones] = useState<string[]>(
-    phoneNumbers.map((p) => p.phone)
+    phoneNumbers.map((p: PhoneNumber) => p.phone)
   );
   const [sendToStudents, setSendToStudents] = useState(true);
   const [sendToParents, setSendToParents] = useState(true);
 
-  const studentPhones = phoneNumbers.filter((p) => p.type === "Ogrenci");
-  const parentPhones = phoneNumbers.filter((p) => p.type === "Veli");
+  const studentPhones = phoneNumbers.filter((p: PhoneNumber) => p.type === "Ogrenci");
+  const parentPhones = phoneNumbers.filter((p: PhoneNumber) => p.type === "Veli");
 
   const handleToggleAll = (type: "Ogrenci" | "Veli", checked: boolean) => {
     const phonesOfType = phoneNumbers
-      .filter((p) => p.type === type)
-      .map((p) => p.phone);
+      .filter((p: PhoneNumber) => p.type === type)
+      .map((p: PhoneNumber) => p.phone);
 
     if (checked) {
       setSelectedPhones((prev) => [...new Set([...prev, ...phonesOfType])]);
     } else {
-      setSelectedPhones((prev) =>
-        prev.filter((phone) => !phonesOfType.includes(phone))
+      setSelectedPhones((prev: string[]) =>
+        prev.filter((phone: string) => !phonesOfType.includes(phone))
       );
     }
 
@@ -64,7 +64,7 @@ export function GroupSmsForm({
     if (checked) {
       setSelectedPhones((prev) => [...prev, phone]);
     } else {
-      setSelectedPhones((prev) => prev.filter((p) => p !== phone));
+      setSelectedPhones((prev: string[]) => prev.filter((p: string) => p !== phone));
     }
   };
 
@@ -224,7 +224,7 @@ export function GroupSmsForm({
                 Bu grupta telefon numarasi bulunamadi
               </p>
             ) : (
-              phoneNumbers.map((pn, index) => (
+              phoneNumbers.map((pn: PhoneNumber, index: number) => (
                 <div
                   key={`${pn.phone}-${index}`}
                   className="flex items-center justify-between p-2 border rounded-lg"

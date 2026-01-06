@@ -1,7 +1,7 @@
 import { i18n, type Locale } from "@/lib/i18n/config";
 
 export async function generateStaticParams() {
-  return i18n.locales.map((locale) => ({ locale }));
+  return i18n.locales.map((locale: Locale) => ({ locale }));
 }
 
 interface LocaleLayoutProps {

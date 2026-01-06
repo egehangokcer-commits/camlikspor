@@ -62,6 +62,10 @@ export default async function GroupDetailPage({
     notFound();
   }
 
+  type Schedule = (typeof group.schedules)[number];
+  type TrainerGroup = (typeof group.trainers)[number];
+  type StudentGroup = (typeof group.students)[number];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -170,7 +174,7 @@ export default async function GroupDetailPage({
               <div className="space-y-2">
                 {group.schedules
                   .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-                  .map((schedule) => (
+                  .map((schedule: Schedule) => (
                     <div
                       key={schedule.id}
                       className="flex items-center justify-between border-b pb-2 last:border-0"
@@ -198,7 +202,7 @@ export default async function GroupDetailPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {group.trainers.map((tg) => (
+                {group.trainers.map((tg: TrainerGroup) => (
                   <div
                     key={tg.trainer.id}
                     className="flex items-center justify-between"
@@ -231,7 +235,7 @@ export default async function GroupDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {group.students.map((sg) => (
+                {group.students.map((sg: StudentGroup) => (
                   <TableRow key={sg.student.id}>
                     <TableCell className="font-mono">
                       {sg.student.studentNumber}

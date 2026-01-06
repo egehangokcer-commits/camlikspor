@@ -188,7 +188,7 @@ export function PasswordResetCard({ users, dealerId }: PasswordResetCardProps) {
             </div>
           ) : (
             <div className="space-y-3">
-              {users.map((user) => (
+              {users.map((user: DealerUser) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-3 border rounded-lg"

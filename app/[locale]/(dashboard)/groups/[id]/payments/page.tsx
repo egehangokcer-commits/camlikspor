@@ -70,15 +70,18 @@ export default async function GroupPaymentsPage({
     notFound();
   }
 
+  type StudentGroup = (typeof group.students)[number];
+  type Payment = StudentGroup["student"]["payments"][number];
+
   // Calculate payment statistics
-  const allPayments = group.students.flatMap((sg) => sg.student.payments);
-  const totalAmount = allPayments.reduce((sum, p) => sum + p.amount, 0);
+  const allPayments = group.students.flatMap((sg: StudentGroup) => sg.student.payments);
+  const totalAmount = allPayments.reduce((sum: number, p: Payment) => sum + p.amount, 0);
   const paidAmount = allPayments
-    .filter((p) => p.status === "COMPLETED")
-    .reduce((sum, p) => sum + p.amount, 0);
+    .filter((p: Payment) => p.status === "COMPLETED")
+    .reduce((sum: number, p: Payment) => sum + p.amount, 0);
   const pendingAmount = allPayments
-    .filter((p) => p.status === "PENDING")
-    .reduce((sum, p) => sum + p.amount, 0);
+    .filter((p: Payment) => p.status === "PENDING")
+    .reduce((sum: number, p: Payment) => sum + p.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -164,19 +167,19 @@ export default async function GroupPaymentsPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {group.students.map((sg) => {
+                {group.students.map((sg: StudentGroup) => {
                   const pendingPayments = sg.student.payments.filter(
-                    (p) => p.status === "PENDING"
+                    (p: Payment) => p.status === "PENDING"
                   );
                   const lastPaid = sg.student.payments.find(
-                    (p) => p.status === "COMPLETED"
+                    (p: Payment) => p.status === "COMPLETED"
                   );
                   const totalPending = pendingPayments.reduce(
-                    (sum, p) => sum + p.amount,
+                    (sum: number, p: Payment) => sum + p.amount,
                     0
                   );
                   const hasOverdue = pendingPayments.some(
-                    (p) => new Date(p.dueDate) < new Date()
+                    (p: Payment) => new Date(p.dueDate) < new Date()
                   );
 
                   return (

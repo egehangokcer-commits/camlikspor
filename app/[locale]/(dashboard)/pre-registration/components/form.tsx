@@ -226,7 +226,7 @@ export function PreRegistrationForm({
                     <SelectValue placeholder="Seciniz" />
                   </SelectTrigger>
                   <SelectContent>
-                    {branches.map((branch) => (
+                    {branches.map((branch: Branch) => (
                       <SelectItem key={branch.id} value={branch.name}>
                         {branch.name}
                       </SelectItem>

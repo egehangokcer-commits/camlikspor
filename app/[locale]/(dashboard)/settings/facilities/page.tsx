@@ -36,8 +36,10 @@ export default async function FacilitiesPage({ params }: FacilitiesPageProps) {
     orderBy: { name: "asc" },
   });
 
+  type Facility = (typeof facilities)[number];
+
   // Flatten location name for display
-  const formattedFacilities = facilities.map((facility) => ({
+  const formattedFacilities = facilities.map((facility: Facility) => ({
     ...facility,
     locationName: facility.location.name,
   }));
