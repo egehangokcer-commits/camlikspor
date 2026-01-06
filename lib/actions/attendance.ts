@@ -115,7 +115,14 @@ export async function updateAttendanceSessionAction(
   }
 }
 
-export async function getGroupStudents(groupId: string) {
+export interface GroupStudent {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+}
+
+export async function getGroupStudents(groupId: string): Promise<GroupStudent[]> {
   const session = await auth();
 
   if (!session?.user?.dealerId) {

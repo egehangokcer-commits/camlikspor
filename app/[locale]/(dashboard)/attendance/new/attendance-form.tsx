@@ -19,6 +19,7 @@ import {
   createAttendanceSessionAction,
   getGroupStudents,
   type AttendanceStatus,
+  type GroupStudent,
 } from "@/lib/actions/attendance";
 import { cn } from "@/lib/utils";
 
@@ -33,18 +34,11 @@ interface Trainer {
   lastName: string;
 }
 
-interface Student {
-  id: string;
-  firstName: string;
-  lastName: string;
-  photoUrl: string | null;
-}
-
 interface AttendanceFormProps {
   groups: Group[];
   trainers: Trainer[];
   initialGroupId?: string;
-  initialStudents: Student[];
+  initialStudents: GroupStudent[];
   locale: string;
   dictionary: Record<string, unknown>;
 }
@@ -70,7 +64,7 @@ export function AttendanceForm({
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [students, setStudents] = useState<GroupStudent[]>(initialStudents);
   const [attendances, setAttendances] = useState<Record<string, AttendanceStatus>>({});
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
 

@@ -52,8 +52,9 @@ export default async function GroupSmsPage({ params }: GroupSmsPageProps) {
   }
 
   // Get unique phone numbers
+  type StudentGroup = (typeof group.students)[number];
   const phoneNumbers: { phone: string; name: string; type: string }[] = [];
-  group.students.forEach((sg) => {
+  group.students.forEach((sg: StudentGroup) => {
     if (sg.student.phone) {
       phoneNumbers.push({
         phone: sg.student.phone,
