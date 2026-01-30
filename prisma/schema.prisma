@@ -25,6 +25,44 @@ model Dealer {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  // Landing page fields
+  heroImage          String?
+  heroTitle          String?
+  heroSubtitle       String?
+  aboutText          String?
+  contactAddress     String?
+  contactEmail       String?
+  contactPhone       String?
+  socialFacebook     String?
+  socialInstagram    String?
+  socialTwitter      String?
+  socialYoutube      String?
+  features           String?  // JSON array of feature texts
+  isPublicPageActive Boolean  @default(true)
+
+  // Domain routing
+  customDomain String? @unique // e.g., shop.bayiadi.com
+  subdomain    String? @unique // e.g., bayiadi (for bayiadi.example.com)
+
+  // Hierarchy (Sub-dealer system)
+  parentDealerId        String?
+  parentDealer          Dealer?  @relation("DealerHierarchy", fields: [parentDealerId], references: [id])
+  subDealers            Dealer[] @relation("DealerHierarchy")
+  hierarchyLevel        Int      @default(0) // 0 = root, 1 = sub-dealer, etc.
+  inheritParentProducts Boolean  @default(true)
+  canCreateOwnProducts  Boolean  @default(true)
+
+  // Whitelabel customization
+  themePresetId   String?
+  themePreset     DealerTheme?  @relation(fields: [themePresetId], references: [id])
+  themeSettings   String?       // JSON: custom colors, fonts override
+  layoutSettings  String?       // JSON: component visibility, layout type
+  customCss       String?       // Raw CSS injection
+  faviconUrl      String?
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+
   users            User[]
   students         Student[]
   trainers         Trainer[]
@@ -51,8 +89,22 @@ model Dealer {
   developmentTypes  DevelopmentType[]
   personnelTypes    PersonnelType[]
 
+  // E-commerce relations
+  products          Product[]
+  productCategories ProductCategory[]
+  orders            ShopOrder[]
+  galleryImages     GalleryImage[]
+
+  // Domain and commission relations
+  domains             DealerDomain[]
+  commissionsAsParent DealerCommission[] @relation("ParentDealerCommission")
+  commissionsAsChild  DealerCommission[] @relation("ChildDealerCommission")
+
   @@index([slug])
   @@index([isActive])
+  @@index([customDomain])
+  @@index([subdomain])
+  @@index([parentDealerId])
 }
 
 model DealerSettings {
@@ -67,6 +119,136 @@ model DealerSettings {
   updatedAt     DateTime @updatedAt
 
   dealer Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// WHITELABEL THEME SYSTEM
+// ============================================
+
+model DealerTheme {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // Color palette
+  primaryColor     String @default("#3B82F6")
+  secondaryColor   String @default("#10B981")
+  accentColor      String @default("#F59E0B")
+  backgroundColor  String @default("#FFFFFF")
+  textColor        String @default("#1F2937")
+  mutedColor       String @default("#6B7280")
+
+  // Typography
+  headingFont String @default("Inter")
+  bodyFont    String @default("Inter")
+
+  // Layout options
+  headerStyle     String @default("default") // default, centered, minimal
+  footerStyle     String @default("default") // default, simple, expanded
+  productGridCols Int    @default(3)         // 2, 3, 4
+
+  // Component visibility
+  showHeroSection  Boolean @default(true)
+  showFeatures     Boolean @default(true)
+  showGallery      Boolean @default(true)
+  showShopPreview  Boolean @default(true)
+  showContact      Boolean @default(true)
+
+  // Metadata
+  isSystem  Boolean  @default(false) // System presets can't be deleted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dealers Dealer[]
+
+  @@index([isSystem])
+}
+
+// ============================================
+// DEALER DOMAIN MANAGEMENT
+// ============================================
+
+model DealerDomain {
+  id       String @id @default(cuid())
+  dealerId String
+  domain   String @unique
+  type     String @default("custom") // custom, subdomain
+
+  // Verification
+  verificationToken  String   @unique @default(cuid())
+  verificationMethod String   @default("dns") // dns, file
+  verified           Boolean  @default(false)
+  verifiedAt         DateTime?
+
+  // SSL
+  sslEnabled       Boolean @default(false)
+  sslCertificateId String?
+
+  isPrimary Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dealer Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  @@index([dealerId])
+  @@index([domain])
+}
+
+// ============================================
+// COMMISSION SYSTEM
+// ============================================
+
+model DealerCommission {
+  id             String @id @default(cuid())
+  parentDealerId String
+  childDealerId  String
+
+  // Commission rates
+  productCommissionRate Float @default(0) // Percentage (0-100)
+  orderCommissionRate   Float @default(0) // Percentage on total order
+  fixedOrderCommission  Float @default(0) // Fixed amount per order
+
+  // Settlement
+  minimumPayout   Float  @default(100)
+  payoutFrequency String @default("monthly") // weekly, monthly, on-demand
+
+  isActive      Boolean   @default(true)
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parentDealer Dealer                  @relation("ParentDealerCommission", fields: [parentDealerId], references: [id])
+  childDealer  Dealer                  @relation("ChildDealerCommission", fields: [childDealerId], references: [id])
+  transactions CommissionTransaction[]
+
+  @@unique([parentDealerId, childDealerId])
+  @@index([parentDealerId])
+  @@index([childDealerId])
+}
+
+model CommissionTransaction {
+  id           String @id @default(cuid())
+  commissionId String
+  orderId      String
+
+  orderTotal       Float
+  commissionAmount Float
+  commissionRate   Float
+
+  status String    @default("PENDING") // PENDING, PAID, CANCELLED
+  paidAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  commission DealerCommission @relation(fields: [commissionId], references: [id])
+  order      ShopOrder        @relation(fields: [orderId], references: [id])
+
+  @@index([commissionId])
+  @@index([orderId])
+  @@index([status])
 }
 
 // ============================================
@@ -381,6 +563,7 @@ model Student {
   materials    StudentMaterial[]
   developments StudentDevelopment[]
   sizes        StudentSize[]
+  shopOrders   ShopOrder[]
 
   @@unique([dealerId, studentNumber])
   @@index([dealerId])
@@ -880,4 +1063,131 @@ model AuditLog {
   @@index([entity])
   @@index([action])
   @@index([timestamp])
+}
+
+// ============================================
+// E-COMMERCE & SHOP
+// ============================================
+// OrderStatus: PENDING | CONFIRMED | PROCESSING | SHIPPED | DELIVERED | CANCELLED
+// PaymentStatus: PENDING | PAID | FAILED | REFUNDED
+
+model ProductCategory {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  dealerId  String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dealer   Dealer    @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([dealerId, slug])
+  @@index([dealerId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  slug        String
+  price       Float    @default(0)
+  images      String?  // JSON array of image URLs
+  categoryId  String
+  dealerId    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   ProductCategory  @relation(fields: [categoryId], references: [id])
+  dealer     Dealer           @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  variants   ProductVariant[]
+  orderItems ShopOrderItem[]
+
+  @@unique([dealerId, slug])
+  @@index([dealerId])
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  size      String   // XS, S, M, L, XL, XXL
+  color     String?
+  stock     Int      @default(0)
+  sku       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems ShopOrderItem[]
+
+  @@unique([productId, size, color])
+  @@index([productId])
+}
+
+model ShopOrder {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  dealerId        String
+  studentId       String?  // Mevcut öğrenci ise
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String?
+  status          String   @default("PENDING") // PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  subtotal        Float
+  shippingCost    Float    @default(0)
+  total           Float
+  paymentId       String?  // PayTR payment ID
+  paymentStatus   String   @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  dealer                 Dealer                  @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  student                Student?                @relation(fields: [studentId], references: [id])
+  items                  ShopOrderItem[]
+  commissionTransactions CommissionTransaction[]
+
+  @@index([dealerId])
+  @@index([studentId])
+  @@index([status])
+  @@index([orderNumber])
+}
+
+model ShopOrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  variantId String?
+  quantity  Int
+  unitPrice Float
+  total     Float
+
+  order   ShopOrder       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  dealerId    String
+  url         String
+  title       String?
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  dealer Dealer @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  @@index([dealerId])
+  @@index([sortOrder])
 }

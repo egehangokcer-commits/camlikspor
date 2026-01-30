@@ -32,6 +32,8 @@ export type PreRegistrationFormState = {
   };
   success?: boolean;
   message?: string;
+  messageKey?: string;
+  errorKey?: string;
 };
 
 export async function createPreRegistrationAction(
@@ -40,18 +42,18 @@ export async function createPreRegistrationAction(
 ): Promise<PreRegistrationFormState> {
   const session = await auth();
   if (!session?.user) {
-    return { errors: { _form: ["Oturum acmaniz gerekiyor"] } };
+    return { errorKey: "sessionRequired" };
   }
 
   // Check permission
   const hasPermission = session.user.permissions?.includes(Permission.PRE_REGISTRATION_CREATE);
   if (!hasPermission && session.user.role !== UserRole.SUPER_ADMIN) {
-    return { errors: { _form: ["Bu islemi yapmaya yetkiniz yok"] } };
+    return { errorKey: "noPermission" };
   }
 
   const dealerId = session.user.dealerId;
   if (!dealerId) {
-    return { errors: { _form: ["Bayi bilgisi bulunamadi. Lutfen bir bayiye atanmis bir kullanici ile giris yapin."] } };
+    return { errorKey: "dealerNotFound" };
   }
 
   const validatedFields = preRegistrationSchema.safeParse({
@@ -105,7 +107,7 @@ export async function createPreRegistrationAction(
     });
 
     revalidatePath("/[locale]/pre-registration");
-    return { success: true, message: "Onkayit basariyla olusturuldu" };
+    return { success: true, messageKey: "preRegistrationCreated" };
   } catch (error) {
     console.error("Pre-registration create error:", error);
     logAudit({
@@ -116,8 +118,7 @@ export async function createPreRegistrationAction(
       status: "FAILURE",
       errorMessage: error instanceof Error ? error.message : "Unknown error",
     });
-    const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
-    return { errors: { _form: [`Onkayit olusturulurken bir hata olustu: ${errorMessage}`] } };
+    return { errorKey: "preRegistrationCreateError" };
   }
 }
 
@@ -128,12 +129,12 @@ export async function updatePreRegistrationAction(
 ): Promise<PreRegistrationFormState> {
   const session = await auth();
   if (!session?.user) {
-    return { errors: { _form: ["Oturum acmaniz gerekiyor"] } };
+    return { errorKey: "sessionRequired" };
   }
 
   const hasPermission = session.user.permissions?.includes(Permission.PRE_REGISTRATION_EDIT);
   if (!hasPermission && session.user.role !== UserRole.SUPER_ADMIN) {
-    return { errors: { _form: ["Bu islemi yapmaya yetkiniz yok"] } };
+    return { errorKey: "noPermission" };
   }
 
   const validatedFields = preRegistrationSchema.safeParse({
@@ -181,7 +182,7 @@ export async function updatePreRegistrationAction(
     });
 
     revalidatePath("/[locale]/pre-registration");
-    return { success: true, message: "Onkayit basariyla guncellendi" };
+    return { success: true, messageKey: "preRegistrationUpdated" };
   } catch (error) {
     logAudit({
       actor: session.user.id,
@@ -192,19 +193,19 @@ export async function updatePreRegistrationAction(
       status: "FAILURE",
       errorMessage: error instanceof Error ? error.message : "Unknown error",
     });
-    return { errors: { _form: ["Onkayit guncellenirken bir hata olustu"] } };
+    return { errorKey: "preRegistrationUpdateError" };
   }
 }
 
-export async function deletePreRegistrationAction(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deletePreRegistrationAction(id: string): Promise<{ success: boolean; errorKey?: string }> {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: "Oturum acmaniz gerekiyor" };
+    return { success: false, errorKey: "sessionRequired" };
   }
 
   const hasPermission = session.user.permissions?.includes(Permission.PRE_REGISTRATION_DELETE);
   if (!hasPermission && session.user.role !== UserRole.SUPER_ADMIN) {
-    return { success: false, error: "Bu islemi yapmaya yetkiniz yok" };
+    return { success: false, errorKey: "noPermission" };
   }
 
   try {
@@ -233,22 +234,22 @@ export async function deletePreRegistrationAction(id: string): Promise<{ success
       status: "FAILURE",
       errorMessage: error instanceof Error ? error.message : "Unknown error",
     });
-    return { success: false, error: "Onkayit silinirken bir hata olustu" };
+    return { success: false, errorKey: "preRegistrationDeleteError" };
   }
 }
 
 export async function updatePreRegistrationStatusAction(
   id: string,
   status: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; errorKey?: string }> {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: "Oturum acmaniz gerekiyor" };
+    return { success: false, errorKey: "sessionRequired" };
   }
 
   const hasPermission = session.user.permissions?.includes(Permission.PRE_REGISTRATION_EDIT);
   if (!hasPermission && session.user.role !== UserRole.SUPER_ADMIN) {
-    return { success: false, error: "Bu islemi yapmaya yetkiniz yok" };
+    return { success: false, errorKey: "noPermission" };
   }
 
   try {
@@ -270,6 +271,6 @@ export async function updatePreRegistrationStatusAction(
     revalidatePath("/[locale]/pre-registration");
     return { success: true };
   } catch (error) {
-    return { success: false, error: "Durum guncellenirken bir hata olustu" };
+    return { success: false, errorKey: "statusUpdateError" };
   }
 }

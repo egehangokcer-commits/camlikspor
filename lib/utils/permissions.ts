@@ -197,6 +197,36 @@ export const MENU_ITEMS: MenuItem[] = [
     href: "/settings",
     permission: Permission.SETTINGS_VIEW,
   },
+  {
+    key: "products",
+    labelKey: "sidebar.products",
+    href: "/products",
+    permission: Permission.SETTINGS_VIEW,
+  },
+  {
+    key: "orders",
+    labelKey: "sidebar.orders",
+    href: "/orders",
+    permission: Permission.SETTINGS_VIEW,
+  },
+  {
+    key: "sub-dealers",
+    labelKey: "sidebar.subDealers",
+    href: "/sub-dealers",
+    permission: Permission.SETTINGS_VIEW,
+  },
+  {
+    key: "customization",
+    labelKey: "sidebar.customization",
+    href: "/customization",
+    permission: Permission.SETTINGS_VIEW,
+  },
+  {
+    key: "commissions",
+    labelKey: "sidebar.commissions",
+    href: "/commissions",
+    permission: Permission.SETTINGS_VIEW,
+  },
 ];
 
 // Menu items for SUPER_ADMIN (only dealer management)

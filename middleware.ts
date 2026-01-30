@@ -9,6 +9,70 @@ import { i18n } from "@/lib/i18n/config";
 // Edge-compatible auth (no Prisma)
 const { auth } = NextAuth(authConfig);
 
+// Main domain for subdomain detection
+const MAIN_DOMAIN = process.env.MAIN_DOMAIN || "localhost:3000";
+
+// Protected route prefixes (dashboard routes)
+const PROTECTED_ROUTES = [
+  "dashboard",
+  "students",
+  "trainers",
+  "groups",
+  "branches",
+  "locations",
+  "facilities",
+  "periods",
+  "pre-registration",
+  "payments",
+  "cash",
+  "sms",
+  "settings",
+  "users",
+  "audit-logs",
+  "reports",
+  "products",
+  "orders",
+  "gallery-admin",
+  "sub-dealers",
+  "customization",
+  "commissions",
+];
+
+// Auth routes
+const AUTH_ROUTES = ["login", "forgot-password"];
+
+// Domain detection helper
+function getDealerFromHost(host: string): {
+  type: "custom" | "subdomain" | null;
+  value: string | null;
+} {
+  // Remove port if present
+  const hostWithoutPort = host.split(":")[0];
+  const mainDomainWithoutPort = MAIN_DOMAIN.split(":")[0];
+
+  // Skip localhost and main domain
+  if (
+    hostWithoutPort === "localhost" ||
+    hostWithoutPort === mainDomainWithoutPort ||
+    hostWithoutPort === `www.${mainDomainWithoutPort}`
+  ) {
+    return { type: null, value: null };
+  }
+
+  // Check for custom domain (not ending with main domain)
+  if (!hostWithoutPort.endsWith(mainDomainWithoutPort)) {
+    return { type: "custom", value: hostWithoutPort };
+  }
+
+  // Check for subdomain (e.g., bayiadi.example.com)
+  const subdomain = hostWithoutPort.replace(`.${mainDomainWithoutPort}`, "");
+  if (subdomain && subdomain !== "www" && subdomain !== "app") {
+    return { type: "subdomain", value: subdomain };
+  }
+
+  return { type: null, value: null };
+}
+
 function getLocale(request: NextRequest): string {
   const negotiatorHeaders: Record<string, string> = {};
   request.headers.forEach((value, key) => {
@@ -23,6 +87,18 @@ function getLocale(request: NextRequest): string {
   }
 }
 
+// Check if a route is protected (requires auth)
+function isProtectedRoute(pathAfterLocale: string): boolean {
+  const firstSegment = pathAfterLocale.split("/")[0];
+  return PROTECTED_ROUTES.includes(firstSegment);
+}
+
+// Check if a route is an auth page
+function isAuthRoute(pathAfterLocale: string): boolean {
+  const firstSegment = pathAfterLocale.split("/")[0];
+  return AUTH_ROUTES.includes(firstSegment);
+}
+
 // Security headers
 const securityHeaders = {
   "X-Frame-Options": "DENY",
@@ -34,6 +110,7 @@ const securityHeaders = {
 
 export default auth(async function middleware(request) {
   const pathname = request.nextUrl.pathname;
+  const host = request.headers.get("host") || "";
 
   // Skip static files and API routes
   if (
@@ -45,14 +122,40 @@ export default auth(async function middleware(request) {
     return NextResponse.next();
   }
 
-  // Handle root path
+  // Domain-based dealer detection
+  const dealerDetection = getDealerFromHost(host);
+
+  // If custom domain or subdomain detected, add headers for downstream use
+  if (dealerDetection.type && dealerDetection.value) {
+    const locale = getLocale(request);
+
+    // For root path on custom domain, redirect to the shop
+    if (pathname === "/" || pathname === `/${locale}`) {
+      // Set dealer info in headers and let the page handle it
+      const response = NextResponse.next();
+      response.headers.set("x-dealer-domain", dealerDetection.value);
+      response.headers.set("x-dealer-domain-type", dealerDetection.type);
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+      return response;
+    }
+
+    // For other paths, add headers
+    const response = NextResponse.next();
+    response.headers.set("x-dealer-domain", dealerDetection.value);
+    response.headers.set("x-dealer-domain-type", dealerDetection.type);
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
+  }
+
+  // Handle root path (no custom domain) - redirect to public shop
   if (pathname === "/") {
     const locale = getLocale(request);
-    const session = request.auth;
-    if (session) {
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
-    }
-    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+    // Redirect to public homepage (e-commerce)
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
   // Check if pathname has locale
@@ -70,32 +173,41 @@ export default auth(async function middleware(request) {
 
   // Get current locale from path
   const currentLocale = pathname.split("/")[1];
+  const pathAfterLocale = pathname.slice(currentLocale.length + 2); // e.g., "dashboard" or "akademi-x/shop"
 
-  // Handle locale-only path (e.g., /tr, /en)
+  // Handle locale-only path (e.g., /tr, /en) - show public homepage
   if (pathname === `/${currentLocale}`) {
-    const session = request.auth;
-    if (session) {
-      return NextResponse.redirect(new URL(`/${currentLocale}/dashboard`, request.url));
-    }
-    return NextResponse.redirect(new URL(`/${currentLocale}/login`, request.url));
+    // Let the public homepage render
+    const response = NextResponse.next();
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
   }
-
-  // Check if this is an auth page
-  const isAuthPage =
-    pathname.includes("/login") || pathname.includes("/forgot-password");
 
   // Get session from auth wrapper
   const session = request.auth;
+  const isProtected = isProtectedRoute(pathAfterLocale);
+  const isAuth = isAuthRoute(pathAfterLocale);
 
-  // Redirect unauthenticated users to login (except auth pages)
-  if (!session && !isAuthPage) {
+  // Public routes (dealer landing pages, shop, etc.) - allow without auth
+  if (!isProtected && !isAuth) {
+    const response = NextResponse.next();
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
+  }
+
+  // Redirect unauthenticated users to login (for protected routes)
+  if (!session && isProtected) {
     const loginUrl = new URL(`/${currentLocale}/login`, request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // Redirect authenticated users away from auth pages
-  if (session && isAuthPage) {
+  if (session && isAuth) {
     return NextResponse.redirect(
       new URL(`/${currentLocale}/dashboard`, request.url)
     );

@@ -26,14 +26,51 @@ async function main() {
   // Create a demo dealer
   const demoDealer = await prisma.dealer.upsert({
     where: { slug: "demo-spor-kulubu" },
-    update: {},
+    update: {
+      // Update landing page fields if dealer already exists
+      heroTitle: "Profesyonel Futbol Ekipmanları",
+      heroSubtitle: "Kaliteli formalar, eşofmanlar ve spor aksesuarları ile takımınızı donatın",
+      aboutText: "Demo Spor Kulübü olarak 2010 yılından bu yana spor malzemeleri sektöründe hizmet vermekteyiz. Kalite ve müşteri memnuniyeti odaklı yaklaşımımızla binlerce sporcuya ulaştık.",
+      contactPhone: "0532 123 45 67",
+      contactEmail: "info@demospor.com",
+      contactAddress: "Atatürk Mah. Spor Cad. No: 42, Kadıköy, İstanbul",
+      socialFacebook: "https://facebook.com/demospor",
+      socialInstagram: "https://instagram.com/demospor",
+      socialTwitter: "https://twitter.com/demospor",
+      socialYoutube: "https://youtube.com/demospor",
+      features: JSON.stringify([
+        "Ücretsiz Kargo",
+        "Güvenli Ödeme",
+        "7/24 Destek",
+        "Kolay İade"
+      ]),
+      isPublicPageActive: true,
+    },
     create: {
-      name: "Demo Spor Kulubu",
+      name: "Demo Spor Kulübü",
       slug: "demo-spor-kulubu",
-      phone: "0532 000 0000",
+      phone: "0532 123 45 67",
       email: "info@demospor.com",
-      address: "Istanbul, Turkiye",
+      address: "Atatürk Mah. Spor Cad. No: 42, Kadıköy, İstanbul",
       isActive: true,
+      // Landing page fields
+      heroTitle: "Profesyonel Futbol Ekipmanları",
+      heroSubtitle: "Kaliteli formalar, eşofmanlar ve spor aksesuarları ile takımınızı donatın",
+      aboutText: "Demo Spor Kulübü olarak 2010 yılından bu yana spor malzemeleri sektöründe hizmet vermekteyiz. Kalite ve müşteri memnuniyeti odaklı yaklaşımımızla binlerce sporcuya ulaştık.",
+      contactPhone: "0532 123 45 67",
+      contactEmail: "info@demospor.com",
+      contactAddress: "Atatürk Mah. Spor Cad. No: 42, Kadıköy, İstanbul",
+      socialFacebook: "https://facebook.com/demospor",
+      socialInstagram: "https://instagram.com/demospor",
+      socialTwitter: "https://twitter.com/demospor",
+      socialYoutube: "https://youtube.com/demospor",
+      features: JSON.stringify([
+        "Ücretsiz Kargo",
+        "Güvenli Ödeme",
+        "7/24 Destek",
+        "Kolay İade"
+      ]),
+      isPublicPageActive: true,
     },
   });
 

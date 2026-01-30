@@ -116,7 +116,7 @@ export default async function StudentsPage({
                 <TableRow>
                   <TableHead>{dictionary.students.studentNumber}</TableHead>
                   <TableHead>{dictionary.students.fullName}</TableHead>
-                  <TableHead>Yas</TableHead>
+                  <TableHead>{dictionary.students.age}</TableHead>
                   <TableHead>{dictionary.students.branch}</TableHead>
                   <TableHead>{dictionary.students.facility}</TableHead>
                   <TableHead>{dictionary.students.parentPhone}</TableHead>
@@ -166,7 +166,7 @@ export default async function StudentsPage({
                           <DropdownMenuItem asChild>
                             <Link href={`/${locale}/students/${student.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
-                              Goruntule
+                              {dictionary.students.view}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>

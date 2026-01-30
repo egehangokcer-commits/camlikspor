@@ -76,6 +76,59 @@ interface StudentData {
   notes?: string | null;
 }
 
+interface Dictionary {
+  common: {
+    save: string;
+    cancel: string;
+    [key: string]: string;
+  };
+  students: {
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    gender: string;
+    male: string;
+    female: string;
+    tcKimlik: string;
+    phone: string;
+    email: string;
+    address: string;
+    branch: string;
+    location: string;
+    facility: string;
+    parentName: string;
+    parentPhone: string;
+    parentEmail: string;
+    parentTcKimlik: string;
+    emergencyContact: string;
+    emergencyPhone: string;
+    monthlyFee: string;
+    registrationFee: string;
+    discountType: string;
+    notes: string;
+    personalInfo: string;
+    personalInfoDesc: string;
+    parentInfo: string;
+    parentInfoDesc: string;
+    educationInfo: string;
+    educationInfoDesc: string;
+    feeInfo: string;
+    feeInfoDesc: string;
+    additionalInfo: string;
+    noDiscount: string;
+    selectGender: string;
+    selectBranch: string;
+    selectLocation: string;
+    selectFacility: string;
+    selectDiscount: string;
+    update: string;
+    [key: string]: string;
+  };
+  errors: Record<string, string>;
+  success: Record<string, string>;
+  [key: string]: unknown;
+}
+
 interface StudentFormProps {
   student?: StudentData;
   branches: Branch[];
@@ -83,7 +136,7 @@ interface StudentFormProps {
   facilities: Facility[];
   discountTypes: DiscountType[];
   locale: string;
-  dictionary: Record<string, unknown>;
+  dictionary: Dictionary;
 }
 
 export function StudentForm({
@@ -97,6 +150,8 @@ export function StudentForm({
 }: StudentFormProps) {
   const router = useRouter();
   const isEditing = !!student;
+  const t = dictionary.students;
+  const common = dictionary.common;
 
   const boundUpdateAction = student
     ? updateStudentAction.bind(null, student.id)
@@ -108,24 +163,26 @@ export function StudentForm({
   );
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
+    if (state.success && state.messageKey) {
+      const message = dictionary.success[state.messageKey] || state.message || state.messageKey;
+      toast.success(message);
       router.push(`/${locale}/students`);
-    } else if (state.message && !state.success) {
-      toast.error(state.message);
+    } else if (state.messageKey && !state.success) {
+      const message = dictionary.errors[state.messageKey] || state.message || state.messageKey;
+      toast.error(message);
     }
-  }, [state, router, locale]);
+  }, [state, router, locale, dictionary]);
 
   return (
     <form action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Kisisel Bilgiler</CardTitle>
-          <CardDescription>Ogrencinin kisisel bilgilerini girin</CardDescription>
+          <CardTitle>{t.personalInfo}</CardTitle>
+          <CardDescription>{t.personalInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Ad *</Label>
+            <Label htmlFor="firstName">{t.firstName} *</Label>
             <Input
               id="firstName"
               name="firstName"
@@ -138,7 +195,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Soyad *</Label>
+            <Label htmlFor="lastName">{t.lastName} *</Label>
             <Input
               id="lastName"
               name="lastName"
@@ -151,7 +208,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="birthDate">Dogum Tarihi *</Label>
+            <Label htmlFor="birthDate">{t.birthDate} *</Label>
             <Input
               id="birthDate"
               name="birthDate"
@@ -169,14 +226,14 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gender">Cinsiyet *</Label>
+            <Label htmlFor="gender">{t.gender} *</Label>
             <Select name="gender" defaultValue={student?.gender || ""}>
               <SelectTrigger>
-                <SelectValue placeholder="Cinsiyet secin" />
+                <SelectValue placeholder={t.selectGender} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MALE">Erkek</SelectItem>
-                <SelectItem value="FEMALE">Kadin</SelectItem>
+                <SelectItem value="MALE">{t.male}</SelectItem>
+                <SelectItem value="FEMALE">{t.female}</SelectItem>
               </SelectContent>
             </Select>
             {state.errors?.gender && (
@@ -185,7 +242,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tcKimlikNo">TC Kimlik No</Label>
+            <Label htmlFor="tcKimlikNo">{t.tcKimlik}</Label>
             <Input
               id="tcKimlikNo"
               name="tcKimlikNo"
@@ -195,7 +252,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefon</Label>
+            <Label htmlFor="phone">{t.phone}</Label>
             <PhoneInput
               id="phone"
               name="phone"
@@ -204,7 +261,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-posta</Label>
+            <Label htmlFor="email">{t.email}</Label>
             <Input
               id="email"
               name="email"
@@ -214,7 +271,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address">Adres</Label>
+            <Label htmlFor="address">{t.address}</Label>
             <Textarea
               id="address"
               name="address"
@@ -227,12 +284,12 @@ export function StudentForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Veli Bilgileri</CardTitle>
-          <CardDescription>Veli iletisim bilgilerini girin</CardDescription>
+          <CardTitle>{t.parentInfo}</CardTitle>
+          <CardDescription>{t.parentInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="parentName">Veli Adi *</Label>
+            <Label htmlFor="parentName">{t.parentName} *</Label>
             <Input
               id="parentName"
               name="parentName"
@@ -245,7 +302,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="parentPhone">Veli Telefon *</Label>
+            <Label htmlFor="parentPhone">{t.parentPhone} *</Label>
             <PhoneInput
               id="parentPhone"
               name="parentPhone"
@@ -258,7 +315,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="parentEmail">Veli E-posta</Label>
+            <Label htmlFor="parentEmail">{t.parentEmail}</Label>
             <Input
               id="parentEmail"
               name="parentEmail"
@@ -268,7 +325,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="parentTcKimlik">Veli TC Kimlik No</Label>
+            <Label htmlFor="parentTcKimlik">{t.parentTcKimlik}</Label>
             <Input
               id="parentTcKimlik"
               name="parentTcKimlik"
@@ -278,7 +335,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="emergencyContact">Acil Durum Kisisi</Label>
+            <Label htmlFor="emergencyContact">{t.emergencyContact}</Label>
             <Input
               id="emergencyContact"
               name="emergencyContact"
@@ -287,7 +344,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="emergencyPhone">Acil Durum Telefon</Label>
+            <Label htmlFor="emergencyPhone">{t.emergencyPhone}</Label>
             <PhoneInput
               id="emergencyPhone"
               name="emergencyPhone"
@@ -299,15 +356,15 @@ export function StudentForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Egitim Bilgileri</CardTitle>
-          <CardDescription>Brans, sube ve tesis bilgilerini secin</CardDescription>
+          <CardTitle>{t.educationInfo}</CardTitle>
+          <CardDescription>{t.educationInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="branchId">Brans *</Label>
+            <Label htmlFor="branchId">{t.branch} *</Label>
             <Select name="branchId" defaultValue={student?.branchId || ""}>
               <SelectTrigger>
-                <SelectValue placeholder="Brans secin" />
+                <SelectValue placeholder={t.selectBranch} />
               </SelectTrigger>
               <SelectContent>
                 {branches.map((branch) => (
@@ -323,10 +380,10 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="locationId">Sube *</Label>
+            <Label htmlFor="locationId">{t.location} *</Label>
             <Select name="locationId" defaultValue={student?.locationId || ""}>
               <SelectTrigger>
-                <SelectValue placeholder="Sube secin" />
+                <SelectValue placeholder={t.selectLocation} />
               </SelectTrigger>
               <SelectContent>
                 {locations.map((location) => (
@@ -342,10 +399,10 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="facilityId">Tesis *</Label>
+            <Label htmlFor="facilityId">{t.facility} *</Label>
             <Select name="facilityId" defaultValue={student?.facilityId || ""}>
               <SelectTrigger>
-                <SelectValue placeholder="Tesis secin" />
+                <SelectValue placeholder={t.selectFacility} />
               </SelectTrigger>
               <SelectContent>
                 {facilities.map((facility) => (
@@ -364,12 +421,12 @@ export function StudentForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Ucret Bilgileri</CardTitle>
-          <CardDescription>Aidat ve indirim bilgilerini girin</CardDescription>
+          <CardTitle>{t.feeInfo}</CardTitle>
+          <CardDescription>{t.feeInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="monthlyFee">Aylik Aidat (TL)</Label>
+            <Label htmlFor="monthlyFee">{t.monthlyFee} (TL)</Label>
             <Input
               id="monthlyFee"
               name="monthlyFee"
@@ -381,7 +438,7 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="registrationFee">Kayit Ucreti (TL)</Label>
+            <Label htmlFor="registrationFee">{t.registrationFee} (TL)</Label>
             <Input
               id="registrationFee"
               name="registrationFee"
@@ -393,13 +450,13 @@ export function StudentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="discountTypeId">Indirim Tipi</Label>
+            <Label htmlFor="discountTypeId">{t.discountType}</Label>
             <Select name="discountTypeId" defaultValue={student?.discountTypeId || "none"}>
               <SelectTrigger>
-                <SelectValue placeholder="Indirim secin (opsiyonel)" />
+                <SelectValue placeholder={t.selectDiscount} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Indirim yok</SelectItem>
+                <SelectItem value="none">{t.noDiscount}</SelectItem>
                 {discountTypes.map((discount) => (
                   <SelectItem key={discount.id} value={discount.id}>
                     {discount.name} (%{discount.percentage})
@@ -413,11 +470,11 @@ export function StudentForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Ek Bilgiler</CardTitle>
+          <CardTitle>{t.additionalInfo}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="notes">Notlar</Label>
+            <Label htmlFor="notes">{t.notes}</Label>
             <Textarea
               id="notes"
               name="notes"
@@ -431,14 +488,14 @@ export function StudentForm({
       <div className="flex gap-4">
         <Button type="submit" disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditing ? "Guncelle" : "Kaydet"}
+          {isEditing ? t.update : common.save}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push(`/${locale}/students`)}
         >
-          Iptal
+          {common.cancel}
         </Button>
       </div>
     </form>

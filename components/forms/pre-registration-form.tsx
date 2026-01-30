@@ -50,20 +50,66 @@ interface PreRegistrationData {
   source?: string | null;
 }
 
+interface Dictionary {
+  common: {
+    save: string;
+    cancel: string;
+    [key: string]: string;
+  };
+  preRegistration: {
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    gender: string;
+    parentName: string;
+    parentPhone: string;
+    parentEmail: string;
+    branchInterest: string;
+    sourceLabel: string;
+    notes: string;
+    studentInfo: string;
+    studentInfoDesc: string;
+    parentInfo: string;
+    parentInfoDesc: string;
+    additionalInfo: string;
+    selectGender: string;
+    selectBranch: string;
+    selectSource: string;
+    notSelected: string;
+    male: string;
+    female: string;
+    update: string;
+    source: {
+      website: string;
+      phone: string;
+      walkIn: string;
+      referral: string;
+      socialMedia: string;
+    };
+    [key: string]: unknown;
+  };
+  errors: Record<string, string>;
+  success: Record<string, string>;
+  [key: string]: unknown;
+}
+
 interface PreRegistrationFormProps {
   preRegistration?: PreRegistrationData;
   branches: Branch[];
   locale: string;
-  dictionary: Record<string, unknown>;
+  dictionary: Dictionary;
 }
 
 export function PreRegistrationForm({
   preRegistration,
   branches,
   locale,
+  dictionary,
 }: PreRegistrationFormProps) {
   const router = useRouter();
   const isEdit = !!preRegistration;
+  const t = dictionary.preRegistration;
+  const common = dictionary.common;
 
   const boundAction = isEdit
     ? updatePreRegistrationAction.bind(null, preRegistration.id)
@@ -75,24 +121,28 @@ export function PreRegistrationForm({
   );
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
+    if (state.success && state.messageKey) {
+      const message = dictionary.success[state.messageKey] || state.message || state.messageKey;
+      toast.success(message);
       router.push(`/${locale}/pre-registration`);
+    } else if (state.errorKey) {
+      const message = dictionary.errors[state.errorKey] || state.errorKey;
+      toast.error(message);
     } else if (state.errors?._form) {
       toast.error(state.errors._form[0]);
     }
-  }, [state, router, locale]);
+  }, [state, router, locale, dictionary]);
 
   return (
     <form action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Ogrenci Bilgileri</CardTitle>
-          <CardDescription>Ogrenci ad, soyad ve dogum tarihi</CardDescription>
+          <CardTitle>{t.studentInfo as string}</CardTitle>
+          <CardDescription>{t.studentInfoDesc as string}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Ad *</Label>
+            <Label htmlFor="firstName">{t.firstName as string} *</Label>
             <Input
               id="firstName"
               name="firstName"
@@ -105,7 +155,7 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Soyad *</Label>
+            <Label htmlFor="lastName">{t.lastName as string} *</Label>
             <Input
               id="lastName"
               name="lastName"
@@ -118,7 +168,7 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="birthDate">Dogum Tarihi</Label>
+            <Label htmlFor="birthDate">{t.birthDate as string}</Label>
             <Input
               id="birthDate"
               name="birthDate"
@@ -132,18 +182,18 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gender">Cinsiyet</Label>
+            <Label htmlFor="gender">{t.gender as string}</Label>
             <Select
               name="gender"
               defaultValue={preRegistration?.gender || "none"}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Cinsiyet secin" />
+                <SelectValue placeholder={t.selectGender as string} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Secilmedi</SelectItem>
-                <SelectItem value="MALE">Erkek</SelectItem>
-                <SelectItem value="FEMALE">Kadin</SelectItem>
+                <SelectItem value="none">{t.notSelected as string}</SelectItem>
+                <SelectItem value="MALE">{t.male as string}</SelectItem>
+                <SelectItem value="FEMALE">{t.female as string}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -152,12 +202,12 @@ export function PreRegistrationForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Veli Bilgileri</CardTitle>
-          <CardDescription>Veli iletisim bilgileri</CardDescription>
+          <CardTitle>{t.parentInfo as string}</CardTitle>
+          <CardDescription>{t.parentInfoDesc as string}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="parentName">Veli Adi *</Label>
+            <Label htmlFor="parentName">{t.parentName as string} *</Label>
             <Input
               id="parentName"
               name="parentName"
@@ -170,7 +220,7 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="parentPhone">Veli Telefon *</Label>
+            <Label htmlFor="parentPhone">{t.parentPhone as string} *</Label>
             <PhoneInput
               id="parentPhone"
               name="parentPhone"
@@ -183,7 +233,7 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="parentEmail">Veli E-posta</Label>
+            <Label htmlFor="parentEmail">{t.parentEmail as string}</Label>
             <Input
               id="parentEmail"
               name="parentEmail"
@@ -199,20 +249,20 @@ export function PreRegistrationForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Ek Bilgiler</CardTitle>
+          <CardTitle>{t.additionalInfo as string}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="branchInterest">Ilgilendigi Brans</Label>
+            <Label htmlFor="branchInterest">{t.branchInterest as string}</Label>
             <Select
               name="branchInterest"
               defaultValue={preRegistration?.branchInterest || "none"}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Brans secin" />
+                <SelectValue placeholder={t.selectBranch as string} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Secilmedi</SelectItem>
+                <SelectItem value="none">{t.notSelected as string}</SelectItem>
                 {branches.map((branch) => (
                   <SelectItem key={branch.id} value={branch.name}>
                     {branch.name}
@@ -223,27 +273,27 @@ export function PreRegistrationForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="source">Kaynak</Label>
+            <Label htmlFor="source">{t.sourceLabel as string}</Label>
             <Select
               name="source"
               defaultValue={preRegistration?.source || "none"}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Kaynak secin" />
+                <SelectValue placeholder={t.selectSource as string} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Secilmedi</SelectItem>
-                <SelectItem value="WEBSITE">Web Sitesi</SelectItem>
-                <SelectItem value="PHONE">Telefon</SelectItem>
-                <SelectItem value="WALKIN">Yuz Yuze</SelectItem>
-                <SelectItem value="REFERRAL">Tavsiye</SelectItem>
-                <SelectItem value="SOCIAL_MEDIA">Sosyal Medya</SelectItem>
+                <SelectItem value="none">{t.notSelected as string}</SelectItem>
+                <SelectItem value="WEBSITE">{t.source.website}</SelectItem>
+                <SelectItem value="PHONE">{t.source.phone}</SelectItem>
+                <SelectItem value="WALKIN">{t.source.walkIn}</SelectItem>
+                <SelectItem value="REFERRAL">{t.source.referral}</SelectItem>
+                <SelectItem value="SOCIAL_MEDIA">{t.source.socialMedia}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="notes">Notlar</Label>
+            <Label htmlFor="notes">{t.notes as string}</Label>
             <Textarea
               id="notes"
               name="notes"
@@ -257,14 +307,14 @@ export function PreRegistrationForm({
       <div className="flex gap-4">
         <Button type="submit" disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEdit ? "Guncelle" : "Kaydet"}
+          {isEdit ? (t.update as string) : common.save}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push(`/${locale}/pre-registration`)}
         >
-          Iptal
+          {common.cancel}
         </Button>
       </div>
     </form>

@@ -32,6 +32,7 @@ export type TrainerFormState = {
     [key: string]: string[];
   };
   message?: string;
+  messageKey?: string;
   success?: boolean;
 };
 
@@ -42,7 +43,7 @@ export async function createTrainerAction(
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   const branchIds = formData.getAll("branchIds") as string[];
@@ -70,7 +71,7 @@ export async function createTrainerAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Lutfen formu kontrol edin",
+      messageKey: "formValidationError",
       success: false,
     };
   }
@@ -108,10 +109,10 @@ export async function createTrainerAction(
     }
 
     revalidatePath("/[locale]/trainers");
-    return { message: "Antrenor basariyla eklendi", success: true };
+    return { messageKey: "trainerCreated", success: true };
   } catch (error) {
     console.error("Create trainer error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "trainerCreateError", success: false };
   }
 }
 
@@ -123,7 +124,7 @@ export async function updateTrainerAction(
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   const branchIds = formData.getAll("branchIds") as string[];
@@ -151,7 +152,7 @@ export async function updateTrainerAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Lutfen formu kontrol edin",
+      messageKey: "formValidationError",
       success: false,
     };
   }
@@ -192,18 +193,18 @@ export async function updateTrainerAction(
 
     revalidatePath("/[locale]/trainers");
     revalidatePath(`/[locale]/trainers/${id}`);
-    return { message: "Antrenor basariyla guncellendi", success: true };
+    return { messageKey: "trainerUpdated", success: true };
   } catch (error) {
     console.error("Update trainer error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "trainerUpdateError", success: false };
   }
 }
 
-export async function deleteTrainerAction(id: string): Promise<{ success: boolean; message: string }> {
+export async function deleteTrainerAction(id: string): Promise<{ success: boolean; messageKey: string }> {
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   try {
@@ -213,9 +214,9 @@ export async function deleteTrainerAction(id: string): Promise<{ success: boolea
     });
 
     revalidatePath("/[locale]/trainers");
-    return { message: "Antrenor silindi", success: true };
+    return { messageKey: "trainerDeleted", success: true };
   } catch (error) {
     console.error("Delete trainer error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "trainerDeleteError", success: false };
   }
 }

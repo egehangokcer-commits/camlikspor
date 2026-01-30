@@ -40,6 +40,7 @@ export type StudentFormState = {
     [key: string]: string[];
   };
   message?: string;
+  messageKey?: string;
   success?: boolean;
 };
 
@@ -50,7 +51,7 @@ export async function createStudentAction(
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   const rawData = {
@@ -82,7 +83,7 @@ export async function createStudentAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Lutfen formu kontrol edin",
+      messageKey: "formValidationError",
       success: false,
     };
   }
@@ -119,10 +120,10 @@ export async function createStudentAction(
     });
 
     revalidatePath("/[locale]/students");
-    return { message: "Ogrenci basariyla eklendi", success: true };
+    return { messageKey: "studentCreated", success: true };
   } catch (error) {
     console.error("Create student error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "studentCreateError", success: false };
   }
 }
 
@@ -134,7 +135,7 @@ export async function updateStudentAction(
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   const rawData = {
@@ -166,7 +167,7 @@ export async function updateStudentAction(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Lutfen formu kontrol edin",
+      messageKey: "formValidationError",
       success: false,
     };
   }
@@ -201,18 +202,18 @@ export async function updateStudentAction(
 
     revalidatePath("/[locale]/students");
     revalidatePath(`/[locale]/students/${id}`);
-    return { message: "Ogrenci basariyla guncellendi", success: true };
+    return { messageKey: "studentUpdated", success: true };
   } catch (error) {
     console.error("Update student error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "studentUpdateError", success: false };
   }
 }
 
-export async function deleteStudentAction(id: string): Promise<{ success: boolean; message: string }> {
+export async function deleteStudentAction(id: string): Promise<{ success: boolean; messageKey: string }> {
   const session = await auth();
 
   if (!session?.user?.dealerId) {
-    return { message: "Yetkilendirme hatasi", success: false };
+    return { messageKey: "authError", success: false };
   }
 
   try {
@@ -222,9 +223,9 @@ export async function deleteStudentAction(id: string): Promise<{ success: boolea
     });
 
     revalidatePath("/[locale]/students");
-    return { message: "Ogrenci silindi", success: true };
+    return { messageKey: "studentDeleted", success: true };
   } catch (error) {
     console.error("Delete student error:", error);
-    return { message: "Bir hata olustu", success: false };
+    return { messageKey: "studentDeleteError", success: false };
   }
 }

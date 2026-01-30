@@ -59,7 +59,7 @@ export function PreRegistrationActions({
         toast.success("Onkayit silindi");
         router.refresh();
       } else {
-        toast.error(result.error || "Bir hata olustu");
+        toast.error(result.errorKey || "Bir hata olustu");
       }
     } catch {
       toast.error("Bir hata olustu");
@@ -76,7 +76,7 @@ export function PreRegistrationActions({
         toast.success("Durum guncellendi");
         router.refresh();
       } else {
-        toast.error(result.error || "Bir hata olustu");
+        toast.error(result.errorKey || "Bir hata olustu");
       }
     } catch {
       toast.error("Bir hata olustu");

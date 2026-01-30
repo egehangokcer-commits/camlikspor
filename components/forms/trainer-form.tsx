@@ -62,12 +62,59 @@ interface TrainerData {
   totalPaidSalary?: number;
 }
 
+interface Dictionary {
+  common: {
+    save: string;
+    cancel: string;
+    [key: string]: string;
+  };
+  trainers: {
+    firstName: string;
+    lastName: string;
+    birthDate: string;
+    gender: string;
+    tcKimlik: string;
+    phone: string;
+    email: string;
+    address: string;
+    branches: string;
+    task: string;
+    salary: string;
+    salaryType: string;
+    bankName: string;
+    bankAccount: string;
+    notes: string;
+    personalInfo: string;
+    personalInfoDesc: string;
+    taskBranchInfo: string;
+    taskBranchInfoDesc: string;
+    salaryInfo: string;
+    salaryInfoDesc: string;
+    additionalInfo: string;
+    totalPaidSalary: string;
+    selectGender: string;
+    selectTask: string;
+    noTask: string;
+    selectSalaryType: string;
+    fixed: string;
+    perHour: string;
+    perSession: string;
+    update: string;
+    male: string;
+    female: string;
+    [key: string]: string;
+  };
+  errors: Record<string, string>;
+  success: Record<string, string>;
+  [key: string]: unknown;
+}
+
 interface TrainerFormProps {
   trainer?: TrainerData;
   branches: Branch[];
   taskDefinitions: TaskDefinition[];
   locale: string;
-  dictionary: Record<string, unknown>;
+  dictionary: Dictionary;
 }
 
 export function TrainerForm({
@@ -79,6 +126,8 @@ export function TrainerForm({
 }: TrainerFormProps) {
   const router = useRouter();
   const isEditing = !!trainer;
+  const t = dictionary.trainers;
+  const common = dictionary.common;
 
   const boundUpdateAction = trainer
     ? updateTrainerAction.bind(null, trainer.id)
@@ -92,24 +141,26 @@ export function TrainerForm({
   const selectedBranchIds = trainer?.branches.map((b) => b.branch.id) || [];
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
+    if (state.success && state.messageKey) {
+      const message = dictionary.success[state.messageKey] || state.message || state.messageKey;
+      toast.success(message);
       router.push(`/${locale}/trainers`);
-    } else if (state.message && !state.success) {
-      toast.error(state.message);
+    } else if (state.messageKey && !state.success) {
+      const message = dictionary.errors[state.messageKey] || state.message || state.messageKey;
+      toast.error(message);
     }
-  }, [state, router, locale]);
+  }, [state, router, locale, dictionary]);
 
   return (
     <form action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Kisisel Bilgiler</CardTitle>
-          <CardDescription>Antrenorun kisisel bilgilerini girin</CardDescription>
+          <CardTitle>{t.personalInfo}</CardTitle>
+          <CardDescription>{t.personalInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Ad *</Label>
+            <Label htmlFor="firstName">{t.firstName} *</Label>
             <Input
               id="firstName"
               name="firstName"
@@ -122,7 +173,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Soyad *</Label>
+            <Label htmlFor="lastName">{t.lastName} *</Label>
             <Input
               id="lastName"
               name="lastName"
@@ -135,7 +186,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="birthDate">Dogum Tarihi</Label>
+            <Label htmlFor="birthDate">{t.birthDate}</Label>
             <Input
               id="birthDate"
               name="birthDate"
@@ -149,20 +200,20 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gender">Cinsiyet</Label>
+            <Label htmlFor="gender">{t.gender}</Label>
             <Select name="gender" defaultValue={trainer?.gender || ""}>
               <SelectTrigger>
-                <SelectValue placeholder="Cinsiyet secin" />
+                <SelectValue placeholder={t.selectGender} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MALE">Erkek</SelectItem>
-                <SelectItem value="FEMALE">Kadin</SelectItem>
+                <SelectItem value="MALE">{t.male}</SelectItem>
+                <SelectItem value="FEMALE">{t.female}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tcKimlikNo">TC Kimlik No</Label>
+            <Label htmlFor="tcKimlikNo">{t.tcKimlik}</Label>
             <Input
               id="tcKimlikNo"
               name="tcKimlikNo"
@@ -172,7 +223,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefon *</Label>
+            <Label htmlFor="phone">{t.phone} *</Label>
             <PhoneInput
               id="phone"
               name="phone"
@@ -185,7 +236,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-posta</Label>
+            <Label htmlFor="email">{t.email}</Label>
             <Input
               id="email"
               name="email"
@@ -195,7 +246,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address">Adres</Label>
+            <Label htmlFor="address">{t.address}</Label>
             <Textarea
               id="address"
               name="address"
@@ -208,21 +259,21 @@ export function TrainerForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Gorev ve Brans Bilgileri</CardTitle>
-          <CardDescription>Gorev ve brans atamalarini yapin</CardDescription>
+          <CardTitle>{t.taskBranchInfo}</CardTitle>
+          <CardDescription>{t.taskBranchInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="taskDefinitionId">Gorev</Label>
+            <Label htmlFor="taskDefinitionId">{t.task}</Label>
             <Select
               name="taskDefinitionId"
               defaultValue={trainer?.taskDefinitionId || "none"}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Gorev secin" />
+                <SelectValue placeholder={t.selectTask} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Gorev yok</SelectItem>
+                <SelectItem value="none">{t.noTask}</SelectItem>
                 {taskDefinitions.map((task) => (
                   <SelectItem key={task.id} value={task.id}>
                     {task.name}
@@ -233,7 +284,7 @@ export function TrainerForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Branslar</Label>
+            <Label>{t.branches}</Label>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
               {branches.map((branch) => (
                 <div key={branch.id} className="flex items-center space-x-2">
@@ -258,16 +309,15 @@ export function TrainerForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Maas Bilgileri</CardTitle>
-          <CardDescription>Maas ve odeme bilgilerini girin</CardDescription>
+          <CardTitle>{t.salaryInfo}</CardTitle>
+          <CardDescription>{t.salaryInfoDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Total Paid Salary - only show when editing */}
           {isEditing && trainer?.totalPaidSalary !== undefined && (
             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
               <Wallet className="h-8 w-8 text-green-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Toplam Odenen Maas</p>
+                <p className="text-sm text-muted-foreground">{t.totalPaidSalary}</p>
                 <p className="text-2xl font-bold text-green-600">
                   {trainer.totalPaidSalary.toLocaleString("tr-TR")} TL
                 </p>
@@ -277,7 +327,7 @@ export function TrainerForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="salary">Maas (TL)</Label>
+              <Label htmlFor="salary">{t.salary} (TL)</Label>
               <Input
                 id="salary"
                 name="salary"
@@ -289,21 +339,21 @@ export function TrainerForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="salaryType">Maas Tipi</Label>
+              <Label htmlFor="salaryType">{t.salaryType}</Label>
               <Select name="salaryType" defaultValue={trainer?.salaryType || ""}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Maas tipi secin" />
+                  <SelectValue placeholder={t.selectSalaryType} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fixed">Sabit</SelectItem>
-                  <SelectItem value="per_hour">Saat Basina</SelectItem>
-                  <SelectItem value="per_session">Seans Basina</SelectItem>
+                  <SelectItem value="fixed">{t.fixed}</SelectItem>
+                  <SelectItem value="per_hour">{t.perHour}</SelectItem>
+                  <SelectItem value="per_session">{t.perSession}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bankName">Banka</Label>
+              <Label htmlFor="bankName">{t.bankName}</Label>
               <BankSelect
                 name="bankName"
                 id="bankName"
@@ -312,7 +362,7 @@ export function TrainerForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bankAccount">IBAN</Label>
+              <Label htmlFor="bankAccount">{t.bankAccount}</Label>
               <Input
                 id="bankAccount"
                 name="bankAccount"
@@ -326,11 +376,11 @@ export function TrainerForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Ek Bilgiler</CardTitle>
+          <CardTitle>{t.additionalInfo}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="notes">Notlar</Label>
+            <Label htmlFor="notes">{t.notes}</Label>
             <Textarea
               id="notes"
               name="notes"
@@ -344,14 +394,14 @@ export function TrainerForm({
       <div className="flex gap-4">
         <Button type="submit" disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditing ? "Guncelle" : "Kaydet"}
+          {isEditing ? t.update : common.save}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push(`/${locale}/trainers`)}
         >
-          Iptal
+          {common.cancel}
         </Button>
       </div>
     </form>

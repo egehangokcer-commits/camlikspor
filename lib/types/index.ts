@@ -177,3 +177,276 @@ export const AuditStatus = {
 } as const;
 
 export type AuditStatus = (typeof AuditStatus)[keyof typeof AuditStatus];
+
+// ============================================
+// E-COMMERCE & SHOP TYPES
+// ============================================
+
+// Order status
+export const OrderStatus = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  PROCESSING: "PROCESSING",
+  SHIPPED: "SHIPPED",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+
+// Shop payment status
+export const ShopPaymentStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export type ShopPaymentStatus =
+  (typeof ShopPaymentStatus)[keyof typeof ShopPaymentStatus];
+
+// ============================================
+// COMMISSION SYSTEM TYPES
+// ============================================
+
+// Commission status
+export const CommissionStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type CommissionStatus =
+  (typeof CommissionStatus)[keyof typeof CommissionStatus];
+
+// Payout frequency
+export const PayoutFrequency = {
+  WEEKLY: "weekly",
+  MONTHLY: "monthly",
+  ON_DEMAND: "on-demand",
+} as const;
+
+export type PayoutFrequency =
+  (typeof PayoutFrequency)[keyof typeof PayoutFrequency];
+
+// ============================================
+// DOMAIN TYPES
+// ============================================
+
+// Domain type
+export const DealerDomainType = {
+  CUSTOM: "custom",
+  SUBDOMAIN: "subdomain",
+} as const;
+
+export type DealerDomainType =
+  (typeof DealerDomainType)[keyof typeof DealerDomainType];
+
+// Domain verification method
+export const DomainVerificationMethod = {
+  DNS: "dns",
+  FILE: "file",
+} as const;
+
+export type DomainVerificationMethod =
+  (typeof DomainVerificationMethod)[keyof typeof DomainVerificationMethod];
+
+// ============================================
+// WHITELABEL THEME TYPES
+// ============================================
+
+// Header style
+export const HeaderStyle = {
+  DEFAULT: "default",
+  CENTERED: "centered",
+  MINIMAL: "minimal",
+} as const;
+
+export type HeaderStyle = (typeof HeaderStyle)[keyof typeof HeaderStyle];
+
+// Footer style
+export const FooterStyle = {
+  DEFAULT: "default",
+  SIMPLE: "simple",
+  EXPANDED: "expanded",
+} as const;
+
+export type FooterStyle = (typeof FooterStyle)[keyof typeof FooterStyle];
+
+// Product grid columns
+export const ProductGridCols = {
+  TWO: 2,
+  THREE: 3,
+  FOUR: 4,
+} as const;
+
+export type ProductGridCols =
+  (typeof ProductGridCols)[keyof typeof ProductGridCols];
+
+// ============================================
+// INTERFACES
+// ============================================
+
+// Sub-dealer interface
+export interface SubDealer {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  parentDealerId: string | null;
+  hierarchyLevel: number;
+  inheritParentProducts: boolean;
+  canCreateOwnProducts: boolean;
+  isActive: boolean;
+  customDomain: string | null;
+  subdomain: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Sub-dealer list item (for tables)
+export interface SubDealerListItem {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  isActive: boolean;
+  hierarchyLevel: number;
+  inheritParentProducts: boolean;
+  canCreateOwnProducts: boolean;
+  customDomain: string | null;
+  subdomain: string | null;
+  createdAt: Date;
+  _count: {
+    subDealers: number;
+    products: number;
+    orders: number;
+  };
+}
+
+// Commission settings interface
+export interface CommissionSettings {
+  id: string;
+  parentDealerId: string;
+  childDealerId: string;
+  productCommissionRate: number;
+  orderCommissionRate: number;
+  fixedOrderCommission: number;
+  minimumPayout: number;
+  payoutFrequency: string;
+  isActive: boolean;
+  effectiveFrom: Date;
+  effectiveTo: Date | null;
+}
+
+// Commission transaction interface
+export interface CommissionTransactionItem {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  orderTotal: number;
+  commissionAmount: number;
+  commissionRate: number;
+  status: string;
+  paidAt: Date | null;
+  createdAt: Date;
+  childDealerName: string;
+}
+
+// Commission report interface
+export interface CommissionReport {
+  totalCommission: number;
+  pendingCommission: number;
+  paidCommission: number;
+  transactionCount: number;
+  transactions: CommissionTransactionItem[];
+}
+
+// Theme settings interface
+export interface ThemeSettings {
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  mutedColor: string;
+  headingFont: string;
+  bodyFont: string;
+}
+
+// Layout settings interface
+export interface LayoutSettings {
+  headerStyle: HeaderStyle;
+  footerStyle: FooterStyle;
+  productGridCols: ProductGridCols;
+  showHeroSection: boolean;
+  showFeatures: boolean;
+  showGallery: boolean;
+  showShopPreview: boolean;
+  showContact: boolean;
+}
+
+// Theme preset interface
+export interface ThemePreset {
+  id: string;
+  name: string;
+  description: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  mutedColor: string;
+  headingFont: string;
+  bodyFont: string;
+  headerStyle: string;
+  footerStyle: string;
+  productGridCols: number;
+  showHeroSection: boolean;
+  showFeatures: boolean;
+  showGallery: boolean;
+  showShopPreview: boolean;
+  showContact: boolean;
+  isSystem: boolean;
+}
+
+// Dealer domain interface
+export interface DealerDomainInfo {
+  id: string;
+  domain: string;
+  type: string;
+  verified: boolean;
+  verifiedAt: Date | null;
+  isPrimary: boolean;
+  isActive: boolean;
+  verificationToken: string;
+  verificationMethod: string;
+  createdAt: Date;
+}
+
+// Dealer with theme for public pages
+export interface DealerPublicInfo {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  heroImage: string | null;
+  heroTitle: string | null;
+  heroSubtitle: string | null;
+  aboutText: string | null;
+  contactAddress: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  socialFacebook: string | null;
+  socialInstagram: string | null;
+  socialTwitter: string | null;
+  socialYoutube: string | null;
+  features: string | null;
+  themeSettings: string | null;
+  layoutSettings: string | null;
+  customCss: string | null;
+  faviconUrl: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  themePreset: ThemePreset | null;
+}

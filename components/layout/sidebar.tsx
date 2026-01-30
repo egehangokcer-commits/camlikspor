@@ -18,6 +18,11 @@ import {
   Building2,
   ChevronDown,
   Banknote,
+  Package,
+  ShoppingCart,
+  Store,
+  Palette,
+  Coins,
 } from "lucide-react";
 import { UserRole } from "@/lib/types";
 import {
@@ -41,6 +46,11 @@ const iconMap: Record<string, React.ElementType> = {
   settings: Settings,
   dealers: Building2,
   "dealer-payments": Banknote,
+  products: Package,
+  orders: ShoppingCart,
+  "sub-dealers": Store,
+  customization: Palette,
+  commissions: Coins,
 };
 
 interface SidebarProps {
